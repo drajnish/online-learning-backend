@@ -10,15 +10,10 @@ dotenv.config({
 
 connectDB()
   .then(() => {
-    app.on("error: ", (err) => {
-      logger.error("Error: ", err);
-      throw err;
-    });
-
     app.listen(PORT_NUMBER, () => {
       logger.info(`Server is running at port ${PORT_NUMBER}`);
     });
   })
   .catch((err) => {
-    logger.error(`MongoDB connection failed!`, err);
+    logger.error("MongoDB connection failed!", err);
   });
