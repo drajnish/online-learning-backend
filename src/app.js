@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import logger from "./utils/logger.js";
+import errorHandler from "./middleware/errorHandler.middleware.js";
+import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
 
@@ -36,5 +38,15 @@ app.use(
     },
   })
 );
+
+// Handle undefined routes
+app.all("*", (req, _res, next) => {
+  return next(
+    new ApiError(404, `Cannot find ${req.originalUrl} on this server!`)
+  );
+});
+
+// Error handling middleware
+app.use(errorHandler);
 
 export { app };
