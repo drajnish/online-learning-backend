@@ -5,7 +5,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { cookieOption, UserRolesEnum } from "../constants/http.constants.js";
-import { forgotPasswordMailgenContent, sendEmail } from "../utils/mail.js";
+import {
+  emailVerificationMailgenContent,
+  forgotPasswordMailgenContent,
+  sendEmail,
+} from "../utils/mail.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -172,6 +176,43 @@ const verifyEmail = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isEmailVerified: true }, "Email is verified"));
 });
 
+// This controller is called when user is logged in and he has snackbar that your email is not verified
+// In case he did not get the email or the email verification token is expired
+// he will be able to resend the token while he is logged in
+const resendEmailVerification = asyncHandler(async (req, res) => {
+  const user = await User.findById(req?.user._id);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  if (user.isEmailVerified) {
+    throw new ApiError(409, "Email is already verified");
+  }
+
+  const { unHashedToken, hashedToken, tokenExpiry } =
+    user.generateTemporaryToken();
+
+  user.emailVerifyToken = hashedToken;
+  user.emailVerifyExpTime = tokenExpiry;
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail({
+    email: user?.email,
+    subject: "Please verify your account",
+    mailgenContent: emailVerificationMailgenContent(
+      user.userName,
+      `${req.protocol}://${req.get(
+        "host"
+      )}/api/v1/users/verify-email/${unHashedToken}`
+    ),
+  });
+
+  return res
+    .status(200)
+    .json(200, {}, "An email has been sent to your mail ID");
+});
+
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req?.cookies.refreshToken || req?.body.refreshToken;
@@ -236,6 +277,23 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(200, {}, "Password updated successfully"));
+});
+
+const assignRole = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  user.role = role;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Role changed for the user"));
 });
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
@@ -313,6 +371,26 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req?.user, "Current user fetched successfully"));
 });
 
+const handleSocialLogin = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    user._id
+  );
+
+  return res
+    .status(301)
+    .cookie("accessToken", accessToken, cookieOption)
+    .cookie("refreshToken", refreshToken, cookieOption)
+    .redirect(
+      `${process.env.CLIENT_SSO_REDIRECT_URL}?accessToken=${accessToken}&refreshToken=${refreshToken}`
+    );
+});
+
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, gender, bio, instagram, twitter, linkedin } = req.body;
 
@@ -347,10 +425,13 @@ export {
   loginUser,
   logoutUser,
   verifyEmail,
+  resendEmailVerification,
   refreshAccessToken,
   changeCurrentPassword,
+  assignRole,
   forgotPasswordRequest,
   resetForgottenPassword,
   getCurrentUser,
+  handleSocialLogin,
   updateAccountDetails,
 };
