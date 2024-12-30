@@ -4,8 +4,10 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import {
   AvailableSocialLogins,
+  AvailableUserRoles,
   USER_TEMPORARY_TOKEN_EXPIRY,
   UserLoginType,
+  UserRolesEnum,
 } from "../constants/http.constants.js";
 
 const userSchema = new Schema(
@@ -32,7 +34,8 @@ const userSchema = new Schema(
     role: {
       type: String,
       required: true,
-      enum: ["student", "instructor", "admin"],
+      enum: AvailableUserRoles,
+      default: UserRolesEnum.STUDENT,
     },
     password: {
       type: String,

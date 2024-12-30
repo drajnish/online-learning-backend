@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     fullName,
     isEmailVerified: false,
-    role: role || UserRolesEnum.USER,
+    role: role || UserRolesEnum.STUDENT,
   });
 
   const { unHashedToken, hashedToken, tokenExpiry } =
@@ -130,7 +130,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     req?.user._id,
     {
       $unset: {
-        refreshToken: 1,
+        refreshToken: "",
       },
     },
     {
@@ -152,6 +152,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Email verification token is missing");
   }
 
+  // generate a hash from the token that we are receiving
   let hashedToken = crypto
     .createHash("sha256")
     .update(verificationToken)
@@ -186,6 +187,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User does not exist");
   }
 
+  // if email is already verified throw an error
   if (user.isEmailVerified) {
     throw new ApiError(409, "Email is already verified");
   }
@@ -383,7 +385,7 @@ const handleSocialLogin = asyncHandler(async (req, res) => {
   );
 
   return res
-    .status(301)
+    .status(302)
     .cookie("accessToken", accessToken, cookieOption)
     .cookie("refreshToken", refreshToken, cookieOption)
     .redirect(
