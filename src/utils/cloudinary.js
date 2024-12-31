@@ -54,4 +54,9 @@ const deleteFromCloudinary = async (oldFilePublicId, resourceType = "auto") => {
   }
 };
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+// Extract Public ID using Cloudinary Utility
+const extractPublicId = (url) => {
+  return cloudinary.utils.getPublicId(url);
+};
+
+export { uploadOnCloudinary, deleteFromCloudinary, extractPublicId };

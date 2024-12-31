@@ -10,6 +10,11 @@ import {
   forgotPasswordMailgenContent,
   sendEmail,
 } from "../utils/mail.js";
+import {
+  deleteFromCloudinary,
+  extractPublicId,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -422,6 +427,39 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   return res.status(201).json(200, user, "Account detail updated successfully");
 });
 
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req?.file.path;
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar.url) {
+    throw new ApiError(400, "Error while uploading avatar");
+  }
+
+  const oldAvatar = await User.findById(req?.user?._id);
+  const oldAvatarPublicId = await extractPublicId(oldAvatar?.avatar);
+
+  const user = await User.findByIdAndUpdate(
+    req?.user?._id,
+    {
+      $set: {
+        avatar: avatar?.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-refreshToken -password -emailVerifyToken -passwordResetToken");
+
+  if (oldAvatarPublicId) {
+    await deleteFromCloudinary(oldAvatarPublicId);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Avatar Updated Successfully"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -436,4 +474,5 @@ export {
   getCurrentUser,
   handleSocialLogin,
   updateAccountDetails,
+  updateUserAvatar,
 };
