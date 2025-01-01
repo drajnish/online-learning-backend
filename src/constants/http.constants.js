@@ -27,3 +27,5 @@ export const cookieOption = {
 };
 
 export const USER_TEMPORARY_TOKEN_EXPIRY = 5 * 60 * 1000;
+
+export const PASSWORD_LENGTH = 5;

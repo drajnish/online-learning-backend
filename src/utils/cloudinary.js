@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import logger from "./logger";
+import logger from "./logger.js";
 
 const MAX_RETRIES = 3;
 let retryCount = 0;
@@ -56,7 +56,7 @@ const deleteFromCloudinary = async (oldFilePublicId, resourceType = "auto") => {
 
 // Extract Public ID using Cloudinary Utility
 const extractPublicId = (url) => {
-  return cloudinary.utils.getPublicId(url);
+  return cloudinary.utils.extract_public_id(url);
 };
 
 export { uploadOnCloudinary, deleteFromCloudinary, extractPublicId };

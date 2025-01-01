@@ -39,6 +39,10 @@ app.use(
   })
 );
 
+import userRouter from "./routes/user.routes.js";
+
+app.use("/api/v1/users", userRouter);
+
 // Handle undefined routes
 app.all("*", (req, _res, next) => {
   return next(

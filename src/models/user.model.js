@@ -137,7 +137,7 @@ userSchema.methods.generateRefreshToken = function () {
 userSchema.methods.generateTemporaryToken = function () {
   // This token should be client facing
   // example: for email verification unhashed token should go into the user's mail
-  const unHashedToken = crypto.randomBytes(20).toString(hex);
+  const unHashedToken = crypto.randomBytes(20).toString("hex");
 
   // This should stay in the DB to compare at the time of verification
   const hashedToken = crypto
