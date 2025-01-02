@@ -8,4 +8,10 @@ const register = Joi.object({
   password: Joi.string().required().min(PASSWORD_LENGTH),
 });
 
-export const userValidation = { register };
+const login = Joi.object({
+  userName: Joi.string(),
+  email: Joi.string(),
+  password: Joi.string().required(),
+}).xor("userName", "email");
+
+export const userValidation = { register, login };

@@ -39,8 +39,10 @@ app.use(
   })
 );
 
+// Routes import
 import userRouter from "./routes/user.routes.js";
 
+// Routes declaration
 app.use("/api/v1/users", userRouter);
 
 // Handle undefined routes

@@ -4,7 +4,11 @@ import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { cookieOption, UserRolesEnum } from "../constants/http.constants.js";
+import {
+  cookieOption,
+  UserLoginType,
+  UserRolesEnum,
+} from "../constants/http.constants.js";
 import {
   emailVerificationMailgenContent,
   forgotPasswordMailgenContent,
@@ -77,7 +81,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   return res
-    .status(201)
+    .status(200)
     .json(
       new ApiResponse(
         200,
@@ -124,10 +128,16 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 
   return res
-    .status(201)
+    .status(200)
     .cookie("accessToken", accessToken, cookieOption)
     .cookie("refreshToken", refreshToken, cookieOption)
-    .json(new ApiResponse(200, loggedInUser, "User loggedIn successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User loggedIn successfully"
+      )
+    );
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
