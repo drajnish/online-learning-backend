@@ -1,10 +1,14 @@
 import { Router } from "express";
 import {
+  assignRole,
+  changeCurrentPassword,
+  forgotPasswordRequest,
   loginUser,
   logoutUser,
   refreshAccessToken,
   registerUser,
   resendEmailVerification,
+  resetForgottenPassword,
   verifyEmail,
 } from "../controllers/user.controller.js";
 import { userValidation } from "../validations/user.validation.js";
@@ -40,5 +44,25 @@ router
   .post(verifyJWT, resendEmailVerification);
 
 router.route("/refresh-token").post(refreshAccessToken);
+
+router
+  .route("/change-password")
+  .post(validate(userValidation.changePwd), verifyJWT, changeCurrentPassword);
+
+// For admin
+router
+  .route("/assign-role/:userId")
+  .post(validate(userValidation.assignRole, "params"), verifyJWT, assignRole);
+
+router
+  .route("/forgot-password")
+  .get(validate(userValidation.forgotPwd), forgotPasswordRequest);
+
+router
+  .route("/forgot-password/:resetToken")
+  .post(
+    validate(userValidation.forgotPwdReset, "params"),
+    resetForgottenPassword
+  );
 
 export default router;

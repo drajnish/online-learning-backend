@@ -5,9 +5,18 @@ import logger from "../utils/logger.js";
 const validate =
   (schema, value = "body") =>
   (req, res, next) => {
+    let error;
+
     try {
-      const { error } = schema.validate(req[value]);
-      if (error) {
+      if (value === "params") {
+        error = schema.validate({
+          ...req.params,
+          ...req.body,
+        });
+      } else {
+        error = schema.validate(req["body"]);
+      }
+      if (error && error.details && error.details.length > 0) {
         throw new ApiError(
           422,
           error?.details[0]?.message?.replace(new RegExp(/\"/, "g"), "")

@@ -1,5 +1,8 @@
 import Joi from "joi";
-import { PASSWORD_LENGTH } from "../constants/http.constants.js";
+import {
+  AvailableUserRoles,
+  PASSWORD_LENGTH,
+} from "../constants/http.constants.js";
 
 const register = Joi.object({
   userName: Joi.string().required(),
@@ -10,8 +13,47 @@ const register = Joi.object({
 
 const login = Joi.object({
   userName: Joi.string(),
-  email: Joi.string(),
+  email: Joi.string().email(),
   password: Joi.string().required(),
 }).xor("userName", "email");
 
-export const userValidation = { register, login };
+const changePwd = Joi.object({
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string().required().min(PASSWORD_LENGTH),
+});
+
+const assignRole = Joi.object({
+  params: Joi.object({
+    userId: Joi.string().required(),
+  }),
+  body: Joi.object({
+    role: Joi.string()
+      .valid(...AvailableUserRoles)
+      .required(),
+  }),
+});
+
+const forgotPwd = Joi.object({
+  email: Joi.string().required().email(),
+});
+
+const forgotPwdReset = Joi.object({
+  params: Joi.object({
+    resetToken: Joi.string()
+      .length(40)
+      .regex(/^[a-fA-F0-9]+$/)
+      .required(),
+  }),
+  body: Joi.object({
+    newPassword: Joi.string().required().min(PASSWORD_LENGTH),
+  }),
+});
+
+export const userValidation = {
+  register,
+  login,
+  changePwd,
+  assignRole,
+  forgotPwd,
+  forgotPwdReset,
+};

@@ -259,8 +259,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     return res
       .status(201)
-      .cookies("accessToken", accessToken, cookieOption)
-      .cookies("refreshToken", newRefreshToken, cookieOption)
+      .cookie("accessToken", accessToken, cookieOption)
+      .cookie("refreshToken", newRefreshToken, cookieOption)
       .json(
         new ApiResponse(
           200,
@@ -276,7 +276,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  const user = await User.findById(req?.user._id);
+  const user = await User.findById(req.user?._id);
 
   if (!user) {
     throw new ApiError(401, "Unauthorized request");
@@ -299,6 +299,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 const assignRole = asyncHandler(async (req, res) => {
   const { userId } = req.params;
   const { role } = req.body;
+
   const user = await User.findById(userId);
 
   if (!user) {
@@ -359,7 +360,7 @@ const resetForgottenPassword = asyncHandler(async (req, res) => {
 
   // Create a hash of the incoming reset token
   let hashedToken = crypto
-    .createdHash("sha256")
+    .createHash("sha256")
     .update(resetToken)
     .digest("hex");
 
