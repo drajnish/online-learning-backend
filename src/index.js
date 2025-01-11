@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
+dotenv.config({
+  path: "./.env",
+});
+
 import logger from "./utils/logger.js";
 import connectDB from "./configs/db.connect.js";
 import { PORT_NUMBER } from "./constants/http.constants.js";
 import { app } from "./app.js";
-
-dotenv.config({
-  path: "./.env",
-});
 
 connectDB()
   .then(() => {

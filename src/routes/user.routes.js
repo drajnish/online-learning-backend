@@ -3,12 +3,15 @@ import {
   assignRole,
   changeCurrentPassword,
   forgotPasswordRequest,
+  getCurrentUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   registerUser,
   resendEmailVerification,
   resetForgottenPassword,
+  updateAccountDetails,
+  updateUserAvatar,
   verifyEmail,
 } from "../controllers/user.controller.js";
 import { userValidation } from "../validations/user.validation.js";
@@ -16,6 +19,7 @@ import { validate } from "../validations/base.validation.js";
 import { addRoleToBody } from "../middleware/addRole.middleware.js";
 import { UserRolesEnum } from "../constants/http.constants.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
@@ -64,5 +68,14 @@ router
     validate(userValidation.forgotPwdReset, "params"),
     resetForgottenPassword
   );
+
+router.route("/user-detail").get(verifyJWT, getCurrentUser);
+
+router.route("/profile-update").patch(verifyJWT, updateAccountDetails);
+
+router
+  .route("/update-avatar")
+  .post(verifyJWT, upload.single("avatar"), updateUserAvatar)
+  .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 
 export default router;

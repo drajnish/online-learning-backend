@@ -16,7 +16,6 @@ import {
 } from "../utils/mail.js";
 import {
   deleteFromCloudinary,
-  extractPublicId,
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
 
@@ -448,7 +447,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   }
 
   const oldAvatar = await User.findById(req?.user?._id);
-  const oldAvatarPublicId = await extractPublicId(oldAvatar?.avatar);
+  const oldAvatarPublicId = oldAvatar?.avatar?.split("/")?.pop()?.split(".")[0];
 
   const user = await User.findByIdAndUpdate(
     req?.user?._id,
@@ -463,7 +462,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   ).select("-refreshToken -password -emailVerifyToken -passwordResetToken");
 
   if (oldAvatarPublicId) {
-    await deleteFromCloudinary(oldAvatarPublicId);
+    await deleteFromCloudinary(oldAvatarPublicId, "image");
   }
 
   return res

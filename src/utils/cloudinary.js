@@ -1,3 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config({
+  path: "./.env",
+});
+
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import logger from "./logger.js";
@@ -55,8 +60,8 @@ const deleteFromCloudinary = async (oldFilePublicId, resourceType = "auto") => {
 };
 
 // Extract Public ID using Cloudinary Utility
-const extractPublicId = (url) => {
-  return cloudinary.utils.extract_public_id(url);
-};
+// const extractPublicId = (url) => {
+//   return cloudinary.utils.extract_public_id(url);
+// };
 
-export { uploadOnCloudinary, deleteFromCloudinary, extractPublicId };
+export { uploadOnCloudinary, deleteFromCloudinary };
