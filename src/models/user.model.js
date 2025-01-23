@@ -39,12 +39,22 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     loginType: {
       type: String,
       enum: AvailableSocialLogins,
       default: UserLoginType.EMAIL_PASSWORD,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
     avatar: {
       type: String,

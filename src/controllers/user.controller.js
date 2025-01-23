@@ -18,6 +18,7 @@ import {
   deleteFromCloudinary,
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
+import { log } from "console";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -470,6 +471,66 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Avatar Updated Successfully"));
 });
 
+const googleLogin = asyncHandler(async (req, res) => {
+  const findUser = await User.findOne({
+    googleId: req.user?.googleId,
+  });
+
+  if (!findUser) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    findUser?._id
+  );
+
+  const loggedInUser = await User.findById(findUser?._id).select(
+    "-password -refreshToken -emailVerifyToken -emailVerifyExpTime"
+  );
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOption)
+    .cookie("refreshToken", refreshToken, cookieOption)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User loggedIn successfully"
+      )
+    );
+});
+
+const githubLogin = asyncHandler(async (req, res) => {
+  const findUser = await User.findOne({
+    githubId: req.user?.githubId,
+  });
+
+  if (!findUser) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    findUser?._id
+  );
+
+  const loggedInUser = await User.findById(findUser?._id).select(
+    "-password -refreshToken -emailVerifyToken -emailVerifyExpTime"
+  );
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOption)
+    .cookie("refreshToken", refreshToken, cookieOption)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User loggedIn successfully"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -485,4 +546,6 @@ export {
   handleSocialLogin,
   updateAccountDetails,
   updateUserAvatar,
+  googleLogin,
+  githubLogin,
 };

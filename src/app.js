@@ -20,6 +20,9 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.use(passport.initialize());
+connectPassport();
+
 // configure morgan
 const morganFormat = ":method :url :status :response-time ms";
 
@@ -41,6 +44,8 @@ app.use(
 
 // Routes import
 import userRouter from "./routes/user.routes.js";
+import passport from "passport";
+import { connectPassport } from "./utils/passport.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);

@@ -10,6 +10,7 @@ import logger from "./logger.js";
 const MAX_RETRIES = 3;
 let retryCount = 0;
 
+// env not available unless importing dotenv in this file
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,

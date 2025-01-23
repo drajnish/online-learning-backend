@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config({
-  path: "./.env",
-});
+import "./configs/env.config.js";
 
 import logger from "./utils/logger.js";
 import connectDB from "./configs/db.connect.js";
