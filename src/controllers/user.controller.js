@@ -18,7 +18,6 @@ import {
   deleteFromCloudinary,
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
-import { log } from "console";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {

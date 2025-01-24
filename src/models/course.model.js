@@ -22,7 +22,8 @@ const courseSchema = new Schema(
       default: 0,
     },
     category: {
-      type: Schema.Types.ObjectId,
+      type: String,
+      // type: Schema.Types.ObjectId,
       ref: "Categories",
       required: true,
     },
@@ -34,9 +35,6 @@ const courseSchema = new Schema(
       type: String,
     },
     language: {
-      type: String,
-    },
-    whatYouWillLearn: {
       type: String,
     },
     requirements: {

@@ -2,8 +2,10 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import logger from "./utils/logger.js";
+import passport from "passport";
 import errorHandler from "./middleware/errorHandler.middleware.js";
+import logger from "./utils/logger.js";
+import { connectPassport } from "./utils/passport.js";
 import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
@@ -44,11 +46,11 @@ app.use(
 
 // Routes import
 import userRouter from "./routes/user.routes.js";
-import passport from "passport";
-import { connectPassport } from "./utils/passport.js";
+import courseRouter from "./routes/course.routes.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/courses", courseRouter);
 
 // Handle undefined routes
 app.all("*", (req, _res, next) => {

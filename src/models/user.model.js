@@ -40,6 +40,9 @@ const userSchema = new Schema(
     password: {
       type: String,
       // required: true,
+      // required: function () {
+      //   return this.loginType === "EMAIL_PASSWORD"; // Only required for email/password registration
+      // },
     },
     loginType: {
       type: String,
