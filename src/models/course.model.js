@@ -1,4 +1,6 @@
 import { Schema, model } from "mongoose";
+import { Module } from "./module.model.js";
+import { Review } from "./review.model.js";
 
 const courseSchema = new Schema(
   {
@@ -53,5 +55,11 @@ const courseSchema = new Schema(
     timestamps: true,
   }
 );
+
+courseSchema.pre("deleteOne", async function (next) {
+  await Module.deleteMany({ course: this._id });
+  await Review.deleteMany({ course: this._id });
+  next();
+});
 
 export const Course = model("Course", courseSchema);

@@ -6,9 +6,9 @@ const quizSchema = new Schema(
       type: String,
       required: true,
     },
-    lesson: {
+    module: {
       type: Schema.Types.ObjectId,
-      ref: "Lesson",
+      ref: "Module",
       required: true,
     },
     timeLimit: {
@@ -17,5 +17,10 @@ const quizSchema = new Schema(
   },
   { timestamps: true }
 );
+
+quizSchema.pre("deleteOne", async function (next) {
+  await Question.deleteMany({ quiz: this._id });
+  next();
+});
 
 export const Quiz = model("Quiz", quizSchema);

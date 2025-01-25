@@ -18,6 +18,11 @@ const questionSchema = new Schema(
       ref: "Quiz",
       required: true,
     },
+    // module: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "Module",
+    //   required: true,
+    // },
     questionType: {
       type: String,
       enum: ["MCQ", "TRUE/FALSE"],

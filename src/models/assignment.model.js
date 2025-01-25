@@ -6,9 +6,9 @@ const assignmentSchema = new Schema(
       type: String,
       required: true,
     },
-    lesson: {
+    module: {
       type: Schema.Types.ObjectId,
-      ref: "Lesson",
+      ref: "Module",
       required: true,
     },
     description: {

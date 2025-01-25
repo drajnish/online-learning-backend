@@ -127,12 +127,163 @@ const deleteCourse = asyncHandler(async (req, res) => {
   }
 
   // delete the course
-  // TODO: delete all other collections data related to this course such as lessons, quizzes, etc.
-  await Course.findByIdAndDelete(courseId);
+  // TODO: delete all other collections data related to this course such as lessons, quizzes, etc. using Transaction
+
+  const deleteCourse = await Course.findById(courseId);
+
+  if (!deleteCourse) {
+    throw new ApiError(500, "Something went wrong while deleting the course");
+  }
+
+  // it removes the course and trigger the pre remove hook to delete all the related data
+  await deleteCourse.deleteOne();
 
   return res
     .status(200)
     .json(new ApiResponse(200, null, "Course deleted successfully"));
 });
 
-export { createCourse, updateCourse, deleteCourse };
+const togglePublishCourse = asyncHandler(async (req, res) => {
+  const { courseId } = req.params;
+
+  // check if the course exists
+  const course = await Course.findById(courseId);
+
+  if (!course) {
+    throw new ApiError(404, "Course not found");
+  }
+
+  // check if the course belongs to the instructor of the course
+  if (!course?.instructor.equals(req.user?._id)) {
+    throw new ApiError(403, "You are not authorized to publish this course");
+  }
+
+  const previousPublishStatus = course.isPublished;
+
+  // publish the course
+  const publishedCourse = await Course.findByIdAndUpdate(
+    courseId,
+    {
+      $set: {
+        isPublished: !previousPublishStatus,
+      },
+    },
+    { new: true }
+  );
+
+  if (!publishedCourse) {
+    throw new ApiError(
+      500,
+      "Something went wrong while changing publish status of the course"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        publishedCourse,
+        "Course publish status changed successfully"
+      )
+    );
+});
+
+const getAllCourses = asyncHandler(async (req, res) => {
+  const { query } = req.query; // Extract search parameters from query
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const skip = (page - 1) * limit; // Calculate skip value
+
+  // Build the match query dynamically
+  const matchQuery = { isPublished: true }; // Default to only published courses
+
+  if (query) {
+    matchQuery.title = { $regex: query, $options: "i" }; // Case-insensitive search by title
+    // matchQuery.category = { $regex: query, $options: "i" }; // Case-insensitive search by category
+  }
+
+  // Count total documents matching the query
+  const totalCourses = await Course.countDocuments(matchQuery);
+
+  // Fetch paginated courses with sorting
+  const courses = await Course.aggregate([
+    {
+      $match: matchQuery, // Filter courses based on query
+    },
+    {
+      $sort: { createdAt: -1 }, // Sort by createdAt in descending order
+    },
+    {
+      $skip: skip, // Skip documents for pagination
+    },
+    {
+      $limit: limit, // limit documents per page
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "instructor",
+        foreignField: "_id",
+        as: "instructor",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              email: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        title: 1,
+        thumbnail: 1,
+        price: 1,
+        level: 1,
+        // instructor: 1,
+        // category: 1,
+        rating: 1,
+        language: 1,
+      },
+    },
+  ]);
+
+  const totalPages = Math.ceil(totalCourses / limit); // Calculate total pages
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        courses: courses,
+        pagination: { totalCourses, totalPages, currentPage: page, limit },
+      },
+      "Courses fetched successfully"
+    )
+  );
+});
+
+export {
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  togglePublishCourse,
+  getAllCourses,
+};
