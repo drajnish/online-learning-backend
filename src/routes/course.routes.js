@@ -4,11 +4,14 @@ import {
   createCourse,
   deleteCourse,
   getAllCourses,
+  getCourseById,
   togglePublishCourse,
   updateCourse,
+  updateCourseThumbnail,
 } from "../controllers/course.controller.js";
 import { validate } from "../validations/base.validation.js";
 import { courseValidation } from "../validations/course.validation.js";
+import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
@@ -18,6 +21,11 @@ router
 
 router.route("/update-course/:courseId").patch(verifyJWT, updateCourse);
 
+router
+  .route("/update-thumbnail/:courseId")
+  .post(verifyJWT, upload.single("thumbnail"), updateCourseThumbnail)
+  .patch(verifyJWT, upload.single("thumbnail"), updateCourseThumbnail);
+
 router.route("/delete-course/:courseId").delete(verifyJWT, deleteCourse);
 
 router
@@ -25,5 +33,7 @@ router
   .patch(verifyJWT, togglePublishCourse);
 
 router.route("/").get(verifyJWT, getAllCourses);
+
+router.route("/:courseId").get(verifyJWT, getCourseById);
 
 export default router;

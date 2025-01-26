@@ -443,7 +443,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
-    throw new ApiError(400, "Error while uploading avatar");
+    throw new ApiError(500, "Error while uploading avatar");
   }
 
   const oldAvatar = await User.findById(req?.user?._id);
