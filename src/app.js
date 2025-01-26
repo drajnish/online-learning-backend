@@ -47,10 +47,12 @@ app.use(
 // Routes import
 import userRouter from "./routes/user.routes.js";
 import courseRouter from "./routes/course.routes.js";
+import moduleRouter from "./routes/module.routes.js";
 
 // Routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/courses", courseRouter);
+app.use("/api/v1/modules", moduleRouter);
 
 // Handle undefined routes
 app.all("*", (req, _res, next) => {

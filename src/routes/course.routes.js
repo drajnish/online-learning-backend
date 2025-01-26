@@ -23,7 +23,6 @@ router.route("/update-course/:courseId").patch(verifyJWT, updateCourse);
 
 router
   .route("/update-thumbnail/:courseId")
-  .post(verifyJWT, upload.single("thumbnail"), updateCourseThumbnail)
   .patch(verifyJWT, upload.single("thumbnail"), updateCourseThumbnail);
 
 router.route("/delete-course/:courseId").delete(verifyJWT, deleteCourse);
